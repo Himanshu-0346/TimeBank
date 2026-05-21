@@ -1,0 +1,39 @@
+<%- include('../partials/header') %>
+
+<div style="max-width: 600px; margin: 0 auto;">
+  <div class="text-center mb-5">
+    <h1 style="font-size: 2.5rem; font-weight: 800;">Edit Profile</h1>
+    <p class="text-muted" style="font-size: 1.1rem;">Update your personal details and skills.</p>
+  </div>
+
+  <div class="card">
+    <form action="/profile/edit/me" method="POST">
+      <div class="form-group">
+        <label for="name">👤 Full Name</label>
+        <input type="text" id="name" name="name" class="form-control" value="<%= currentUser.name %>" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="bio">📝 Bio</label>
+        <textarea id="bio" name="bio" class="form-control" placeholder="Tell the community about yourself..."><%= currentUser.bio %></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="location">📍 Location</label>
+        <input type="text" id="location" name="location" class="form-control" value="<%= currentUser.location %>" placeholder="e.g. New York, NY">
+      </div>
+      
+      <div class="form-group">
+        <label for="skills">🛠️ Skills (Comma separated)</label>
+        <input type="text" id="skills" name="skills" class="form-control" value="<%= currentUser.skills.join(', ') %>" required placeholder="e.g. design, plumbing, math">
+      </div>
+      
+      <div class="d-flex gap-3 mt-5">
+        <a href="/profile/<%= currentUser.id %>" class="btn secondary-btn flex-1 text-center" style="flex: 1;">Cancel</a>
+        <button type="submit" class="btn primary-btn flex-1" style="flex: 1;">💾 Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

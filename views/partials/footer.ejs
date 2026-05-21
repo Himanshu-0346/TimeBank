@@ -1,0 +1,24 @@
+  <% const isDashboard = currentUser && (typeof path !== 'undefined' && path !== '/'); %>
+  
+  <% if (isDashboard) { %>
+        </main> <!-- end app-content -->
+      </div> <!-- end app-main -->
+    </div> <!-- end app-layout -->
+  <% } else { %>
+      </main> <!-- end public-content -->
+    </div> <!-- end public-layout -->
+  <% } %>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <% if (currentUser) { %>
+    <script>
+      window.USER_ID = "<%= currentUser.id %>";
+      window.USER_SKILLS = <%- JSON.stringify(currentUser.skills || []) %>;
+    </script>
+  <% } %>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

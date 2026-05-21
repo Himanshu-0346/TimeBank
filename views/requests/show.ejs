@@ -1,0 +1,186 @@
+<%- include('../partials/header') %>
+
+<div class="mb-4">
+  <a href="/dashboard" class="btn secondary-btn small-btn" style="border: 1px solid var(--border-color);"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+</div>
+
+<div class="responsive-split">
+  <!-- Left Side: Request Details -->
+  <div class="card" style="padding: 3rem;">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+      <h1 style="margin: 0; font-size: 2.5rem; font-weight: 800;"><%= request.title %></h1>
+      <div class="badge badge-warning" style="font-size: 1.2rem; padding: 0.6rem 1.2rem;">
+        <i class="fa-solid fa-coins"></i> <%= request.credits %> Credits
+      </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-5">
+      <span class="badge" style="background: var(--primary-color); color: white; padding: 0.4rem 1rem;"><%= request.status.toUpperCase() %></span>
+      <span class="tag"><i class="fa-solid fa-folder"></i> <%= request.category %></span>
+      <span class="tag"><i class="fa-solid fa-wrench"></i> <%= request.requiredSkill %></span>
+    </div>
+
+    <div class="mb-5">
+      <h3 class="mb-3" style="font-size: 1.5rem;">📝 Detailed Description</h3>
+      <div style="background: var(--bg-app); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+        <p style="white-space: pre-wrap; margin: 0; font-size: 1.1rem; line-height: 1.8; color: var(--text-muted);"><%= request.description %></p>
+      </div>
+    </div>
+    
+    <div class="d-flex gap-4 mb-5 flex-wrap">
+      <% if (request.voiceNote) { %>
+        <div style="flex: 1; min-width: 300px; padding: 1.8rem; background: linear-gradient(145deg, rgba(6, 182, 212, 0.05) 0%, rgba(6, 182, 212, 0.01) 100%); border-radius: var(--radius-md); border-left: 6px solid var(--secondary-color); box-shadow: 0 10px 30px -5px rgba(6, 182, 212, 0.15);">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div style="width: 45px; height: 45px; border-radius: 50%; background: var(--secondary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 4px 10px rgba(6, 182, 212, 0.3);">
+              <i class="fa-solid fa-microphone"></i>
+            </div>
+            <h3 style="margin: 0; font-size: 1.4rem; color: var(--text-dark); font-weight: 800;">Voice Note</h3>
+          </div>
+          <audio controls src="<%= request.voiceNote %>" style="width: 100%; border-radius: 50px; outline: none; background: #f8fafc; padding: 5px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);"></audio>
+        </div>
+      <% } %>
+
+      <% if (request.isScheduled) { %>
+        <div style="flex: 1; min-width: 300px; padding: 1.8rem; background: linear-gradient(145deg, rgba(99, 102, 241, 0.05) 0%, rgba(99, 102, 241, 0.01) 100%); border-radius: var(--radius-md); border-left: 6px solid var(--primary-color); box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.15);">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div style="width: 45px; height: 45px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);">
+              <i class="fa-solid fa-capsules"></i>
+            </div>
+            <h3 style="margin: 0; font-size: 1.4rem; color: var(--text-dark); font-weight: 800;">Time Capsule</h3>
+          </div>
+          <div style="padding-left: 57px;">
+            <p style="margin: 0; font-size: 1.15rem; color: var(--text-dark);">
+              Scheduled for: <strong><%= new Date(request.scheduledDate).toLocaleDateString() %></strong>
+            </p>
+            <p style="margin-top: 0.8rem; font-size: 1.05rem; color: var(--text-muted); line-height: 1.6;">
+              Credits are held in Escrow. Payment will be released after completion.
+              <br><strong style="color: <%= request.paymentReleased ? 'var(--success-color)' : 'var(--warning-color)' %>; background: <%= request.paymentReleased ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)' %>; padding: 0.3rem 1rem; border-radius: 50px; display: inline-block; margin-top: 0.6rem;"><%= request.paymentReleased ? 'Released' : 'Held in Escrow' %></strong>
+            </p>
+          </div>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Actions Area -->
+    <div style="border-top: 1px solid var(--border-color); padding-top: 2rem;">
+      <% if (request.status === 'open' && request.poster.id.toString() !== currentUser.id.toString()) { %>
+        <form action="/requests/<%= request._id %>/accept" method="POST">
+          <button type="submit" class="btn primary-btn w-100" style="padding: 1.2rem; font-size: 1.2rem;">🤝 Accept This Request</button>
+        </form>
+      <% } else if (request.status === 'open' && request.poster.id.toString() === currentUser.id.toString()) { %>
+         <div class="alert" style="padding: 1.5rem; background: rgba(99, 102, 241, 0.08); color: var(--primary-color); border-left: 5px solid var(--primary-color); border-radius: var(--radius-md);">
+           <i class="fa-solid fa-clock"></i> Waiting for someone to accept your request.
+         </div>
+      <% } %>
+
+      <% if (request.status === 'accepted' && request.helper && request.helper.id.toString() === currentUser.id.toString()) { %>
+        <div class="alert" style="background: rgba(16, 185, 129, 0.1); color: var(--success-color); border-left: 5px solid var(--success-color);">
+          <i class="fa-solid fa-handshake"></i> You have accepted this request. Please coordinate with the poster.
+        </div>
+        <form action="/requests/<%= request._id %>/complete" method="POST" class="mt-4">
+          <button type="submit" class="btn w-100" style="background: var(--success-color); color: white; padding: 1.2rem; font-size: 1.2rem;">
+            <i class="fa-solid fa-check-circle"></i> Mark Task as Completed
+          </button>
+        </form>
+      <% } %>
+
+      <% if (request.status === 'completed') { %>
+        <div class="alert" style="background: rgba(16, 185, 129, 0.1); color: var(--success-color); border-left: 5px solid var(--success-color);">
+          <i class="fa-solid fa-check-double"></i> This request has been successfully completed!
+        </div>
+        
+        <% if (request.isScheduled && !request.paymentReleased && request.helper && String(request.helper._id) === String(currentUser._id)) { %>
+          <div class="mt-4 p-4" style="background: var(--bg-app); border-radius: var(--radius-md);">
+            <h4 style="font-size: 1.2rem; margin-bottom: 1rem;">💰 Escrow Payment</h4>
+            <% if (new Date() >= new Date(request.scheduledDate)) { %>
+              <form action="/requests/<%= request._id %>/claim-escrow" method="POST">
+                <button type="submit" class="btn primary-btn w-100" style="padding: 1.2rem; font-size: 1.2rem;">Claim <%= request.credits %> Credits</button>
+              </form>
+            <% } else { %>
+              <div class="alert alert-warning"><i class="fa-solid fa-clock"></i> You can claim payment on <%= new Date(request.scheduledDate).toLocaleDateString() %>.</div>
+            <% } %>
+          </div>
+        <% } %>
+
+        <% if (String(request.poster._id) === String(currentUser._id) || (request.helper && String(request.helper._id) === String(currentUser._id))) { %>
+          <a href="/profile/<%= String(request.poster._id) === String(currentUser._id) ? request.helper._id : request.poster._id %>?reviewRequest=<%= request._id %>" class="btn primary-btn w-100 mt-3" style="padding: 1rem;">
+            <i class="fa-solid fa-star"></i> Leave a Review
+          </a>
+        <% } %>
+      <% } %>
+
+      <% if (['accepted', 'completed'].includes(request.status) && (!request.isScheduled || !request.paymentReleased)) { %>
+        <% if (String(request.poster._id) === String(currentUser._id) || (request.helper && String(request.helper._id) === String(currentUser._id))) { %>
+          <div class="mt-4 pt-4" style="border-top: 1px dashed var(--border-color);">
+            <form action="/disputes/<%= request._id %>/raise" method="POST">
+              <div class="form-group mb-2">
+                <label style="font-weight: 700; color: var(--danger-color);">⚖️ Raise a Dispute (TimeBank Guarantee)</label>
+                <textarea name="reason" class="form-control" placeholder="Explain the issue (max 500 chars)..." maxlength="500" required></textarea>
+              </div>
+              <button type="submit" class="btn w-100" style="background: var(--danger-color); color: white; padding: 1rem;"><i class="fa-solid fa-gavel"></i> Submit Dispute to Jury</button>
+            </form>
+          </div>
+        <% } %>
+      <% } %>
+
+      <% if (request.status === 'disputed') { %>
+        <div class="alert mt-4" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border-left: 5px solid var(--danger-color);">
+          <i class="fa-solid fa-gavel"></i> This request is currently under dispute and is being reviewed by the Jury.
+        </div>
+        
+        <% if (typeof dispute !== 'undefined' && dispute) { %>
+          <div class="mt-4 p-4" style="background: var(--bg-app); border-radius: var(--radius-md);">
+            <h4 style="font-size: 1.2rem; margin-bottom: 1rem;"><i class="fa-solid fa-file-contract"></i> Dispute Details</h4>
+            <p><strong>Initiator's Claim:</strong> "<%= dispute.reason %>"</p>
+            
+            <% if (dispute.status === 'open' && dispute.defendant.toString() === currentUser.id.toString()) { %>
+              <div class="mt-4 pt-4" style="border-top: 1px dashed var(--border-color);">
+                <form action="/disputes/<%= dispute.id %>/respond" method="POST">
+                  <div class="form-group mb-2">
+                    <label style="font-weight: 700;">Your Response (Required for Jury to vote)</label>
+                    <textarea name="defendantResponse" class="form-control" placeholder="Provide your side of the story (max 500 chars)..." maxlength="500" required></textarea>
+                  </div>
+                  <button type="submit" class="btn primary-btn w-100" style="padding: 1rem;">Submit Response</button>
+                </form>
+              </div>
+            <% } else if (dispute.defendantResponse) { %>
+              <p><strong>Defendant's Response:</strong> "<%= dispute.defendantResponse %>"</p>
+              <div class="badge badge-warning mt-2">Currently being voted on by Jury</div>
+            <% } else { %>
+              <div class="badge mt-2" style="background: var(--bg-app); color: var(--text-muted);">Waiting for defendant to respond...</div>
+            <% } %>
+          </div>
+        <% } %>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Right Side: User Info Cards -->
+  <div class="d-flex flex-column gap-4">
+    <div class="card">
+      <h3 class="mb-4" style="font-size: 1.3rem;">🗣️ Poster Information</h3>
+      <div class="d-flex align-items-center gap-4">
+        <img src="<%= request.poster.avatar %>" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-color);">
+        <div>
+          <h4 style="font-size: 1.2rem; margin-bottom: 0.3rem;"><a href="/profile/<%= request.poster._id %>" style="color: var(--text-dark);"><%= request.poster.name %></a></h4>
+          <div class="badge badge-warning" style="font-size: 0.9rem; padding: 0.3rem 0.8rem;"><i class="fa-solid fa-star"></i> <%= request.poster.ratingAvg || 'New' %></div>
+        </div>
+      </div>
+    </div>
+
+    <% if (request.helper) { %>
+      <div class="card" style="border-top: 4px solid var(--success-color);">
+        <h3 class="mb-4" style="font-size: 1.3rem;">🤝 Helper Information</h3>
+        <div class="d-flex align-items-center gap-4">
+          <img src="<%= request.helper.avatar %>" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--success-color);">
+          <div>
+            <h4 style="font-size: 1.2rem; margin-bottom: 0.3rem;"><a href="/profile/<%= request.helper._id %>" style="color: var(--text-dark);"><%= request.helper.name %></a></h4>
+            <div class="badge badge-warning" style="font-size: 0.9rem; padding: 0.3rem 0.8rem;"><i class="fa-solid fa-star"></i> <%= request.helper.ratingAvg || 'New' %></div>
+          </div>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

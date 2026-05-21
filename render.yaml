@@ -1,0 +1,58 @@
+// render.yaml
+// Render deployment configuration - WHAT IT DOES: Defines cloud infrastructure
+
+services:
+  # Web service (Node.js backend)
+  - type: web
+    name: timebank-api
+    runtime: node
+    plan: free
+    region: oregon          # Choose closest region
+    buildCommand: npm install
+    startCommand: npm start
+    
+    # Environment variables
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: timebank-db
+          property: connectionString
+      - key: CLOUDINARY_CLOUD_NAME
+        value: your_cloud_name
+      - key: CLOUDINARY_API_KEY
+        sync: false  # Don't sync to GitHub
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+
+    # Health check
+    healthCheckPath: /
+    healthCheckStartupTimeout: 300
+
+    # Auto-deploy on push
+    autoDeploy: true
+
+  # PostgreSQL Database
+  - name: timebank-db
+    plan: free
+    ipAllowList: []  # Allow all IPs
+
+# Cron jobs (optional - for cleanup, notifications)
+jobs:
+  - name: cleanup-expired-requests
+    runtime: node
+    buildCommand: npm install
+    startCommand: node scripts/cleanup.js
+    schedule: "0 2 * * *"  # Daily at 2 AM UTC
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: timebank-db
+          property: connectionString

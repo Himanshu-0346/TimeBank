@@ -1,0 +1,104 @@
+<%- include('../partials/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 style="font-size: 2.5rem; font-weight: 800;"><i class="fa-solid fa-gavel" style="color: var(--danger-color);"></i> Jury Duty</h1>
+  <div class="badge badge-warning" style="font-size: 1.1rem; padding: 0.5rem 1rem;">
+    Trusted User Level
+  </div>
+</div>
+
+<div class="card mb-5" style="background: rgba(99, 102, 241, 0.05); border: 1px dashed var(--primary-color);">
+  <h3 style="color: var(--primary-color); margin-bottom: 0.5rem;">TimeBank Guarantee</h3>
+  <p style="margin: 0; color: var(--text-muted); font-size: 1.1rem; line-height: 1.6;">
+    As a highly trusted member of the community (3+ completed helps), you have been selected to review disputes. 
+    Read both sides and cast your vote to resolve the issue fairly. 3 votes are required to close a dispute.
+  </p>
+</div>
+
+<% if (disputes.length === 0) { %>
+  <div class="text-center" style="padding: 4rem 2rem;">
+    <div style="font-size: 4rem; color: var(--border-color); margin-bottom: 1rem;"><i class="fa-solid fa-scale-balanced"></i></div>
+    <h3 style="color: var(--text-muted);">No active disputes right now.</h3>
+    <p>The community is operating smoothly!</p>
+  </div>
+<% } else { %>
+  <div class="d-flex flex-column gap-4">
+    <% disputes.forEach(dispute => { %>
+      <div class="card" style="border-left: 5px solid var(--danger-color);">
+        <div class="d-flex justify-content-between align-items-start mb-4">
+          <div>
+            <span class="tag mb-2" style="background: var(--danger-color); color: white;"><%= dispute.status.toUpperCase() %></span>
+            <h3 style="margin: 0; font-size: 1.5rem;">
+              <a href="/requests/<%= dispute.request.id %>" style="color: var(--text-dark); text-decoration: underline;">
+                <%= dispute.request.title %>
+              </a>
+            </h3>
+          </div>
+          <div class="badge" style="background: var(--bg-app); color: var(--text-muted);">
+            <i class="fa-solid fa-users"></i> Votes: <%= dispute.votes.length %> / 3
+          </div>
+        </div>
+
+        <div class="grid-2 gap-4">
+          <!-- Initiator Side -->
+          <div style="background: var(--bg-app); padding: 1.5rem; border-radius: var(--radius-md);">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <img src="<%= dispute.initiator.avatar %>" style="width: 40px; height: 40px; border-radius: 50%;">
+              <div>
+                <strong style="display: block;"><%= dispute.initiator.name %></strong>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Initiator</span>
+              </div>
+            </div>
+            <p style="font-style: italic; color: var(--text-dark); font-size: 1.1rem; line-height: 1.6;">"<%= dispute.reason %>"</p>
+            
+            <% const alreadyVoted = dispute.votes.some(v => v.juror.toString() === currentUser.id.toString()); %>
+            <% const isParty = (dispute.initiator.id.toString() === currentUser.id.toString() || dispute.defendant.id.toString() === currentUser.id.toString()); %>
+            
+            <% if (dispute.status === 'voting' && !alreadyVoted && !isParty) { %>
+              <form action="/disputes/<%= dispute.id %>/vote" method="POST" class="mt-4">
+                <input type="hidden" name="voteFor" value="<%= dispute.initiator.id %>">
+                <button type="submit" class="btn w-100" style="background: white; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 1rem;"><i class="fa-solid fa-vote-yea"></i> Vote for Initiator</button>
+              </form>
+            <% } %>
+          </div>
+
+          <!-- Defendant Side -->
+          <div style="background: var(--bg-app); padding: 1.5rem; border-radius: var(--radius-md);">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <img src="<%= dispute.defendant.avatar %>" style="width: 40px; height: 40px; border-radius: 50%;">
+              <div>
+                <strong style="display: block;"><%= dispute.defendant.name %></strong>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Defendant</span>
+              </div>
+            </div>
+            <% if (dispute.defendantResponse) { %>
+              <p style="font-style: italic; color: var(--text-dark); font-size: 1.1rem; line-height: 1.6;">"<%= dispute.defendantResponse %>"</p>
+              <% if (dispute.status === 'voting' && !alreadyVoted && !isParty) { %>
+                <form action="/disputes/<%= dispute.id %>/vote" method="POST" class="mt-4">
+                  <input type="hidden" name="voteFor" value="<%= dispute.defendant.id %>">
+                  <button type="submit" class="btn w-100" style="background: white; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 1rem;"><i class="fa-solid fa-vote-yea"></i> Vote for Defendant</button>
+                </form>
+              <% } %>
+            <% } else { %>
+              <div class="alert alert-warning mt-3"><i class="fa-solid fa-clock"></i> Waiting for defendant to respond...</div>
+            <% } %>
+          </div>
+        </div>
+
+        <% if (alreadyVoted) { %>
+          <div class="alert mt-4" style="background: rgba(16, 185, 129, 0.1); color: var(--success-color); border: 1px dashed var(--success-color);">
+            <i class="fa-solid fa-check"></i> You have cast your vote on this dispute.
+          </div>
+        <% } %>
+        <% if (isParty) { %>
+          <div class="alert mt-4" style="background: rgba(245, 158, 11, 0.1); color: var(--warning-color); border: 1px dashed var(--warning-color);">
+            <i class="fa-solid fa-lock"></i> You are a party to this dispute and cannot vote on it.
+          </div>
+        <% } %>
+
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

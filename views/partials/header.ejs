@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | TimeBank</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css?v=4">
+  <script>
+    // Prevent theme flash by applying saved theme immediately
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+</head>
+<body>
+  <% const userExists = typeof currentUser !== 'undefined' && currentUser; %>
+  <% const isDashboard = userExists && (typeof path !== 'undefined' && path !== '/'); %>
+  
+  <% if (isDashboard) { %>
+    <!-- ================= DASHBOARD LAYOUT ================= -->
+    <div class="app-layout">
+      <!-- Mobile Overlay -->
+      <div class="mobile-overlay" id="mobile-overlay"></div>
+      
+      <!-- Sidebar Navigation -->
+      <aside class="app-sidebar" id="app-sidebar">
+        <div class="sidebar-brand">
+          <i class="fa-solid fa-hourglass-half"></i> TimeBank
+        </div>
+        
+        <div class="sidebar-search">
+          <i class="fa-solid fa-search"></i>
+          <input type="text" placeholder="Search">
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="/dashboard" class="<%= path === '/dashboard' ? 'active' : '' %>">
+            <i class="fa-solid fa-chart-pie"></i> Dashboard
+          </a>
+          
+          <div class="nav-section-title">REQUESTS</div>
+          <a href="/requests/all" class="<%= path === '/requests/all' ? 'active' : '' %>">
+            <i class="fa-solid fa-users"></i> All Requests
+          </a>
+          <a href="/requests/my" class="<%= path === '/requests/my' ? 'active' : '' %>">
+            <i class="fa-solid fa-clipboard-list"></i> My Posts
+          </a>
+          <a href="/requests/helping" class="<%= path === '/requests/helping' ? 'active' : '' %>">
+            <i class="fa-solid fa-handshake-angle"></i> Helping
+          </a>
+          
+          <div class="nav-section-title">COMMUNITY</div>
+          <a href="/leaderboard" class="<%= typeof path !== 'undefined' && path === '/leaderboard' ? 'active' : '' %>">
+            <i class="fa-solid fa-trophy"></i> Leaderboard
+          </a>
+          <a href="/rewards" class="<%= typeof path !== 'undefined' && path === '/rewards' ? 'active' : '' %>">
+            <i class="fa-solid fa-gift"></i> Rewards
+          </a>
+          <% if (currentUser.helpsCount >= 3) { %>
+          <a href="/disputes/jury" class="<%= typeof path !== 'undefined' && path === '/disputes/jury' ? 'active' : '' %>">
+            <i class="fa-solid fa-gavel"></i> Jury Duty
+          </a>
+          <% } %>
+          
+          <div class="nav-section-title">ACCOUNT</div>
+          <a href="/profile/<%= currentUser.id %>" class="<%= path.startsWith('/profile') ? 'active' : '' %>">
+            <i class="fa-solid fa-user"></i> Profile
+          </a>
+          <a href="/notifications" class="<%= path === '/notifications' ? 'active' : '' %>">
+            <i class="fa-solid fa-bell"></i> Notifications
+          </a>
+          <a href="/auth/logout" style="color: #ef4444;">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Log out
+          </a>
+        </nav>
+
+        <div class="sidebar-user">
+          <img src="<%= currentUser.avatar %>" alt="avatar" class="sidebar-avatar">
+          <div class="user-info">
+            <div class="user-name"><%= currentUser.name %></div>
+            <div class="user-credits"><%= currentUser.credits %> Credits</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="app-main">
+        <header class="app-topbar">
+          <button id="menu-toggle" class="menu-toggle" aria-label="Open Menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div style="flex:1;"></div>
+          <div class="topbar-right d-flex align-items-center gap-3">
+            <a href="/requests/new" class="btn primary-btn small-btn" style="margin: 0;"><i class="fa-solid fa-plus"></i> Post Request</a>
+            <button id="theme-toggle" class="icon-btn" style="margin: 0;"><i class="fa-solid fa-moon"></i></button>
+          </div>
+        </header>
+        <div class="app-content" style="padding-top: 1rem;">
+  
+  <% } else { %>
+    <!-- ================= PUBLIC LAYOUT (Landing & Auth) ================= -->
+    <div class="public-layout">
+      <nav class="public-nav">
+        <a href="/" class="nav-brand" style="color: white;">
+          <i class="fa-solid fa-hourglass-half"></i> TimeBank.
+        </a>
+        <div class="nav-links">
+          <a href="/">Home</a>
+          <a href="/#features">Features</a>
+          <a href="/#testimonials">Stories</a>
+          <% if (userExists) { %>
+            <a href="/dashboard" class="btn primary-btn small-btn" style="background: white; color: var(--primary-color);">Dashboard</a>
+          <% } else { %>
+            <a href="/auth/login">Login</a>
+            <a href="/auth/signup" class="btn primary-btn small-btn" style="background: white; color: var(--primary-color);">Sign Up</a>
+          <% } %>
+        </div>
+      </nav>
+      <main class="public-content">
+  <% } %>

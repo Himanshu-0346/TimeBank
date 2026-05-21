@@ -1,0 +1,47 @@
+<%- include('../partials/header') %>
+
+<div class="auth-split">
+  <div class="auth-left">
+    <div style="font-size: 2rem; font-weight: 900; color: white; display: flex; align-items: center; gap: 0.5rem; position: absolute; top: 3rem; left: 4rem;">
+      <i class="fa-solid fa-hourglass-half"></i> TimeBank.
+    </div>
+    <div style="max-width: 400px; margin-top: -5rem;">
+      <h1 style="font-size: 3.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; color: #38bdf8;">Welcome<br>Back! 👋</h1>
+      <p style="font-size: 1.3rem; line-height: 1.6; color: rgba(255,255,255,0.8);">Login to continue your journey of turning time into valuable community credits.</p>
+    </div>
+  </div>
+  
+  <div class="auth-right">
+    <div class="card" style="width: 100%; max-width: 480px; padding: 3rem 2.5rem; border: none; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);">
+      <h2 class="mb-2" style="font-size: 2rem; font-weight: 800;">Login</h2>
+      <p class="text-muted mb-4" style="font-size: 1.1rem;">Access your account securely.</p>
+      
+      <% if (error) { %>
+        <div class="alert alert-danger mb-4" style="padding: 1rem; font-size: 1rem;"><i class="fa-solid fa-triangle-exclamation"></i> <%= error %></div>
+      <% } %>
+
+      <form action="/auth/login" method="POST">
+        <div class="form-group mb-4">
+          <label for="email">📧 Email Address</label>
+          <input type="email" id="email" name="email" class="form-control" placeholder="yourname@example.com" required style="padding: 1.2rem; font-size: 1.1rem;">
+        </div>
+        
+        <div class="form-group mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <label for="password" style="margin: 0;">🔒 Password</label>
+            <a href="#" style="font-size: 0.95rem; color: var(--primary-color); font-weight: 600;">Forgot?</a>
+          </div>
+          <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required style="padding: 1.2rem; font-size: 1.1rem;">
+        </div>
+        
+        <button type="submit" class="btn primary-btn w-100 mt-2" style="padding: 1.2rem; font-size: 1.2rem;">Login <i class="fa-solid fa-arrow-right"></i></button>
+      </form>
+      
+      <p class="text-center mt-5" style="color: var(--text-muted); font-size: 1.05rem;">
+        Don't have an account? <a href="/auth/signup" style="color: var(--primary-color); font-weight: 700; text-decoration: underline;">Sign up</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,111 @@
+<%- include('partials/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 style="font-size: 2rem; color: #1e293b; margin: 0;">Overview</h1>
+  <div class="d-flex gap-3">
+    <!-- Date picker placeholder like in template -->
+    <div style="background: white; border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: var(--radius-sm); color: var(--text-muted); font-size: 0.9rem;">
+      <i class="fa-regular fa-calendar" style="margin-right: 0.5rem;"></i> Jan 1 - Jan 31
+    </div>
+  </div>
+</div>
+
+<div class="grid-3 mb-4">
+  <!-- Stat Card 1 -->
+  <div class="card" style="padding: 2rem; display: flex; flex-direction: column;">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+      <h2 style="font-size: 2.5rem; margin: 0;"><%= currentUser.credits %> <span style="font-size: 1.5rem; color: var(--success-color);"><i class="fa-solid fa-arrow-trend-up"></i></span></h2>
+    </div>
+    <p class="text-muted" style="margin: 0; font-size: 0.9rem;">Available Credits in your wallet.</p>
+    <a href="/rewards" style="color: var(--primary-color); font-weight: 600; font-size: 0.9rem; margin-top: auto; display: block; padding-top: 2rem;">Spend Credits &rarr;</a>
+  </div>
+  
+  <!-- Stat Card 2 -->
+  <div class="card" style="padding: 2rem; display: flex; flex-direction: column;">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+      <h2 style="font-size: 2.5rem; margin: 0;"><%= stats.totalHelped %> <span style="font-size: 1.5rem; color: var(--success-color);"><i class="fa-solid fa-arrow-trend-up"></i></span></h2>
+    </div>
+    <p class="text-muted" style="margin: 0; font-size: 0.9rem;">Tasks successfully completed by you.</p>
+    <a href="/requests/helping" style="color: var(--primary-color); font-weight: 600; font-size: 0.9rem; margin-top: auto; display: block; padding-top: 2rem;">View Tasks &rarr;</a>
+  </div>
+  
+  <!-- Stat Card 3 (Donut Chart Placeholder) -->
+  <div class="card" style="padding: 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <div style="width: 150px; height: 150px; position: relative;">
+      <!-- CSS Half Donut -->
+      <div style="width: 150px; height: 75px; background: #ffeaa7; border-top-left-radius: 75px; border-top-right-radius: 75px; position: absolute; top: 0; left: 0;"></div>
+      <div style="width: 150px; height: 75px; background: var(--warning-color); border-top-left-radius: 75px; border-top-right-radius: 75px; position: absolute; top: 0; left: 0; transform-origin: bottom center; transform: rotate(45deg); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 100%);"></div>
+      <div style="width: 110px; height: 55px; background: white; border-top-left-radius: 55px; border-top-right-radius: 55px; position: absolute; top: 20px; left: 20px;"></div>
+      <div style="position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: 2rem; font-weight: 700;"><%= stats.totalPosted %></div>
+    </div>
+    <p class="text-muted mt-3" style="font-size: 0.9rem; margin-bottom: 0;">Help Requests Posted</p>
+    <a href="/requests/my" style="color: var(--primary-color); font-weight: 600; font-size: 0.9rem; margin-top: auto; display: block; padding-top: 2rem;">View All Posts &rarr;</a>
+  </div>
+</div>
+
+<div class="grid-2">
+  <!-- Left Side: Customers / Open Requests List -->
+  <div class="card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 style="margin: 0; font-size: 1.2rem;">Open Requests</h3>
+      <span style="color: var(--text-light); font-size: 0.9rem; cursor: pointer;">Sort by Newest <i class="fa-solid fa-chevron-down"></i></span>
+    </div>
+    
+    <div>
+      <% if (openRequests.length === 0) { %>
+        <p class="text-muted">No open requests available.</p>
+      <% } else { %>
+        <% openRequests.forEach((req, index) => { %>
+          <div class="list-item" style="<%= index === 0 ? 'background: #fffbeb; padding: 1rem; border-radius: 8px;' : '' %>">
+            <img src="<%= req.poster.avatar %>" alt="avatar" class="list-avatar">
+            <div class="list-content">
+              <div class="list-title"><%= req.poster.name %></div>
+              <div class="list-subtitle"><%= req.title %> (<%= req.credits %> Credits)</div>
+            </div>
+            <div class="list-action">
+              <a href="/requests/<%= req._id %>" title="View"><i class="fa-regular fa-eye"></i></a>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+    
+    <a href="/requests/all" style="color: var(--primary-color); font-weight: 600; font-size: 0.9rem; display: block; margin-top: 1rem;">All requests &rarr;</a>
+  </div>
+
+  <!-- Right Side: Charts and Small Widgets -->
+  <div class="d-flex flex-column gap-4">
+    <!-- Chart Card -->
+    <div class="card">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 style="margin: 0; font-size: 1.2rem;">Growth</h3>
+        <span style="color: var(--text-light); font-size: 0.9rem; cursor: pointer;">Yearly <i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <!-- Placeholder SVG Area Chart -->
+      <div style="width: 100%; height: 150px; background: url('https://upload.wikimedia.org/wikipedia/commons/4/41/Simple_line_graph.svg') no-repeat center center; background-size: cover; opacity: 0.5;"></div>
+    </div>
+    
+    <!-- Mini Stat Cards -->
+    <div class="grid-3">
+      <div class="card" style="padding: 1.5rem;">
+        <p class="text-muted" style="margin-bottom: 0.5rem; font-size: 0.85rem;">Top month</p>
+        <h3 style="margin: 0; color: #d97706; font-size: 1.1rem;">November</h3>
+        <p class="text-light" style="font-size: 0.8rem; margin: 0;">2026</p>
+      </div>
+      <div class="card" style="padding: 1.5rem;">
+        <p class="text-muted" style="margin-bottom: 0.5rem; font-size: 0.85rem;">Top year</p>
+        <h3 style="margin: 0; color: #b45309; font-size: 1.1rem;">2026</h3>
+        <p class="text-light" style="font-size: 0.8rem; margin: 0;">Best so far</p>
+      </div>
+      <div class="card" style="padding: 1.5rem;">
+        <p class="text-muted" style="margin-bottom: 0.5rem; font-size: 0.85rem;">Top helper</p>
+        <div class="d-flex align-items-center gap-2 mt-2">
+          <div style="width: 24px; height: 24px; background: #3b82f6; border-radius: 50%;"></div>
+          <span style="font-size: 0.85rem; font-weight: 600;">System</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

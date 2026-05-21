@@ -1,0 +1,48 @@
+<%- include('../partials/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-5">
+  <h1 style="font-size: 2.5rem; font-weight: 800;"><i class="fa-solid fa-bell text-primary"></i> Notifications</h1>
+</div>
+
+<div style="max-width: 900px; margin: 0 auto;">
+  <% if (notifications.length === 0) { %>
+    <div class="card text-center" style="padding: 4rem;">
+      <i class="fa-regular fa-bell-slash text-muted" style="font-size: 4rem; opacity: 0.5; margin-bottom: 1rem;"></i>
+      <p class="text-muted" style="font-size: 1.2rem;">You're all caught up! No new notifications.</p>
+    </div>
+  <% } else { %>
+    <div class="d-flex flex-column gap-3">
+      <% notifications.forEach(notif => { %>
+        <div class="list-item" style="opacity: <%= notif.read ? '0.6' : '1' %>;" id="notif-<%= notif.id %>">
+          
+          <div class="list-avatar d-flex align-items-center justify-content-center" style="border: none; background: <%= notif.type === 'new_request' ? 'rgba(99,102,241,0.1)' : notif.type === 'request_accepted' ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)' %>; color: <%= notif.type === 'new_request' ? 'var(--primary-color)' : notif.type === 'request_accepted' ? 'var(--warning-color)' : 'var(--success-color)' %>; font-size: 1.5rem;">
+            <% if (notif.type === 'new_request') { %><i class="fa-solid fa-bullhorn"></i><% } %>
+            <% if (notif.type === 'request_accepted') { %><i class="fa-solid fa-handshake"></i><% } %>
+            <% if (notif.type === 'task_completed') { %><i class="fa-solid fa-check-double"></i><% } %>
+          </div>
+          
+          <div class="list-content">
+            <h3 class="list-title" style="font-weight: <%= notif.read ? '600' : '800' %>; font-size: 1.15rem;">
+              <%= notif.message %>
+              <% if (!notif.read) { %>
+                <span class="badge" style="background: var(--danger-color); font-size: 0.8rem; margin-left: 0.5rem; color: white;">NEW</span>
+              <% } %>
+            </h3>
+            <p class="list-subtitle"><%= new Date(notif.createdAt).toLocaleString() %></p>
+          </div>
+          
+          <div class="list-action">
+            <% if (notif.link) { %>
+              <a href="<%= notif.link %>" class="btn secondary-btn small-btn" style="border: 1px solid var(--border-color);">View</a>
+            <% } %>
+            <% if (!notif.read) { %>
+              <button onclick="markNotifRead('<%= notif.id %>', document.getElementById('notif-<%= notif.id %>'))" class="btn primary-btn small-btn" title="Mark as Read"><i class="fa-solid fa-check"></i></button>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

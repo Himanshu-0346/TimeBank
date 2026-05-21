@@ -1,0 +1,25 @@
+<%- include('partials/header') %>
+
+<div class="d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+  <div class="card text-center" style="max-width: 500px; padding: 4rem 3rem;">
+    <div style="font-size: 5rem; color: var(--danger-color); margin-bottom: 1.5rem;">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+    
+    <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;"><%= (typeof error !== 'undefined' && error.status) ? error.status : 500 %> Error</h1>
+    
+    <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 2rem;">
+      <%= (typeof message !== 'undefined') ? message : "Oops! Something went wrong." %>
+    </p>
+
+    <% if (typeof error !== 'undefined' && error.stack && process.env.NODE_ENV !== 'production') { %>
+      <div style="background: var(--bg-app); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-sm); text-align: left; overflow-x: auto; margin-bottom: 2rem;">
+        <pre style="font-size: 0.8rem; color: var(--danger-color); m-0"><%= error.stack %></pre>
+      </div>
+    <% } %>
+
+    <a href="/" class="btn primary-btn" style="padding: 1rem 2rem;"><i class="fa-solid fa-home"></i> Return Home</a>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

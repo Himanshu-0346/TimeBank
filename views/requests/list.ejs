@@ -1,0 +1,59 @@
+<%- include('../partials/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-5">
+  <div>
+    <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem;"><%= title %></h1>
+    <p class="text-muted" style="font-size: 1.1rem; margin: 0;">Browse and manage help requests.</p>
+  </div>
+  <% if (type === 'my') { %>
+    <a href="/requests/new" class="btn primary-btn"><i class="fa-solid fa-plus"></i> Post New</a>
+  <% } %>
+</div>
+
+<% if (requests.length === 0) { %>
+  <div class="card text-center" style="padding: 4rem;">
+    <i class="fa-solid fa-folder-open text-muted" style="font-size: 4rem; opacity: 0.5; margin-bottom: 1rem;"></i>
+    <p class="text-muted" style="font-size: 1.2rem;">No requests found here.</p>
+    <% if (type === 'helping') { %>
+      <a href="/requests/all" class="btn primary-btn mt-4">Find open requests to help with!</a>
+    <% } %>
+  </div>
+<% } else { %>
+  <div class="d-flex flex-column gap-3">
+    <% requests.forEach(req => { %>
+      <div class="list-item">
+        <img src="<%= req.poster.avatar %>" alt="Avatar" class="list-avatar">
+        
+        <div class="list-content">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <h3 class="list-title" style="margin: 0;"><%= req.title %></h3>
+            <span class="badge" style="background: <%= req.status === 'open' ? 'var(--primary-color)' : (req.status === 'accepted' ? 'var(--warning-color)' : 'var(--success-color)') %>; color: white; padding: 0.2rem 0.8rem; font-size: 0.8rem;">
+              <%= req.status.toUpperCase() %>
+            </span>
+          </div>
+          <p class="list-subtitle mb-2"><%= req.description.substring(0, 120) %>...</p>
+          <div class="d-flex gap-2">
+            <span class="tag"><i class="fa-solid fa-folder"></i> <%= req.category %></span>
+            <span class="tag"><i class="fa-solid fa-coins text-warning"></i> <%= req.credits %> Credits</span>
+          </div>
+        </div>
+        
+        <div class="d-flex flex-column gap-2" style="align-items: flex-end; min-width: 150px;">
+          <% if (type === 'all' && req.status === 'open' && String(req.poster?._id) !== String(currentUser?._id)) { %>
+            <form action="/requests/<%= req._id %>/accept" method="POST" style="margin: 0;">
+              <button type="submit" class="btn primary-btn small-btn w-100">Accept</button>
+            </form>
+          <% } %>
+          <% if (type === 'helping' && req.status === 'accepted') { %>
+            <form action="/requests/<%= req._id %>/complete" method="POST" style="margin: 0;">
+              <button type="submit" class="btn small-btn w-100" style="background: var(--success-color); color: white;"><i class="fa-solid fa-check"></i> Complete</button>
+            </form>
+          <% } %>
+          <a href="/requests/<%= req._id %>" class="btn secondary-btn small-btn w-100">Details</a>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

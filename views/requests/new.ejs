@@ -1,0 +1,179 @@
+<%- include('../partials/header') %>
+
+<div style="max-width: 800px; margin: 0 auto;">
+  <div class="text-center mb-5">
+    <div style="display: inline-block; padding: 1.5rem; background: rgba(99, 102, 241, 0.1); border-radius: 50%; color: var(--primary-color); font-size: 2.5rem; margin-bottom: 1.5rem;">
+      <i class="fa-solid fa-hand-holding-heart"></i>
+    </div>
+    <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">Post a Help Request</h1>
+    <p class="text-muted" style="font-size: 1.2rem;">Need an extra hand? Describe your task below.</p>
+    <div class="badge badge-warning mt-3" style="font-size: 1.1rem; padding: 0.6rem 1.5rem;">
+      💰 Available Balance: <%= currentUser.credits %> Credits
+    </div>
+  </div>
+
+  <div class="card">
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation"></i> <%= error %></div>
+    <% } %>
+
+    <form action="/requests/new" method="POST">
+      <div class="form-group">
+        <label for="title">📝 Task Title</label>
+        <input type="text" id="title" name="title" class="form-control" placeholder="e.g. Need help fixing my bike chain" required>
+      </div>
+      
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="category">📂 Category</label>
+          <select id="category" name="category" class="form-control" required>
+            <option value="Tutoring">📚 Tutoring</option>
+            <option value="Home Repair">🔧 Home Repair</option>
+            <option value="Tech Support">💻 Tech Support</option>
+            <option value="Gardening">🌱 Gardening</option>
+            <option value="Errands">🚗 Errands</option>
+            <option value="Other">✨ Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="requiredSkill">🎯 Required Skill</label>
+          <input type="text" id="requiredSkill" name="requiredSkill" class="form-control" placeholder="e.g. plumbing, javascript" required>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="credits">⏱️ Credits to Offer (Duration in Hours)</label>
+        <input type="number" id="credits" name="credits" class="form-control" min="1" max="<%= currentUser.credits %>" value="1" required>
+      </div>
+      
+      <div class="card mb-4 mt-4" style="background: rgba(99, 102, 241, 0.05); border: 1px dashed var(--primary-color);">
+        <h4 style="color: var(--primary-color); margin-bottom: 1rem; font-size: 1.2rem;"><i class="fa-solid fa-capsules"></i> Time Capsule (Schedule for Later)</h4>
+        <div class="form-group mb-3">
+          <label class="d-flex align-items-center gap-2" style="cursor: pointer; font-weight: 600;">
+            <input type="checkbox" id="isScheduled" name="isScheduled" style="width: 20px; height: 20px; accent-color: var(--primary-color);">
+            Schedule this request for a future date (Credits held in Escrow)
+          </label>
+        </div>
+        <div class="form-group" id="scheduledDateContainer" style="display: none;">
+          <label for="scheduledDate">📅 When do you need this done?</label>
+          <input type="date" id="scheduledDate" name="scheduledDate" class="form-control" style="max-width: 200px;">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="description">✍️ Detailed Description</label>
+        <textarea id="description" name="description" class="form-control" placeholder="Describe exactly what needs to be done, when, and where..." required></textarea>
+      </div>
+      
+      <div class="form-group mt-4 p-4" style="background: var(--bg-app); border-radius: var(--radius-md);">
+        <label style="font-weight: 700; margin-bottom: 1rem; display: block;">🎙️ Voice Note (Optional - Max 30s)</label>
+        <div class="d-flex align-items-center gap-3">
+          <button type="button" id="recordBtn" class="btn" style="background: white; color: var(--danger-color); border: 2px solid var(--danger-color); border-radius: 50%; width: 60px; height: 60px; font-size: 1.5rem; transition: all 0.3s; display: flex; align-items: center; justify-content: center;">
+            <i class="fa-solid fa-microphone"></i>
+          </button>
+          <div id="recordingStatus" class="text-muted" style="font-weight: 600; font-size: 1.1rem;">Click to record...</div>
+        </div>
+        <input type="hidden" id="voiceNote" name="voiceNote">
+        <audio id="audioPlayback" controls style="display: none; margin-top: 1rem; width: 100%; border-radius: 50px; outline: none;"></audio>
+      </div>
+      
+      <button type="submit" class="btn primary-btn w-100 mt-4" style="padding: 1.2rem; font-size: 1.2rem;">
+        🚀 Publish Request
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Time Capsule Logic
+  const isScheduled = document.getElementById('isScheduled');
+  const scheduledDateContainer = document.getElementById('scheduledDateContainer');
+  const scheduledDateInput = document.getElementById('scheduledDate');
+  
+  isScheduled.addEventListener('change', (e) => {
+    if (e.target.checked) {
+      scheduledDateContainer.style.display = 'block';
+      scheduledDateInput.required = true;
+      // Set min date to today
+      const today = new Date().toISOString().split('T')[0];
+      scheduledDateInput.min = today;
+    } else {
+      scheduledDateContainer.style.display = 'none';
+      scheduledDateInput.required = false;
+      scheduledDateInput.value = '';
+    }
+  });
+
+  // Voice Note Recorder Logic
+  const recordBtn = document.getElementById('recordBtn');
+  const recordingStatus = document.getElementById('recordingStatus');
+  const voiceNoteInput = document.getElementById('voiceNote');
+  const audioPlayback = document.getElementById('audioPlayback');
+  
+  let mediaRecorder;
+  let audioChunks = [];
+  let isRecording = false;
+  let recordTimer;
+  let seconds = 0;
+
+  recordBtn.addEventListener('click', async () => {
+    if (!isRecording) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        
+        mediaRecorder.ondataavailable = event => {
+          audioChunks.push(event.data);
+        };
+        
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const reader = new FileReader();
+          reader.readAsDataURL(audioBlob);
+          reader.onloadend = () => {
+            voiceNoteInput.value = reader.result;
+            audioPlayback.src = reader.result;
+            audioPlayback.style.display = 'block';
+          };
+          audioChunks = [];
+        };
+        
+        mediaRecorder.start();
+        isRecording = true;
+        recordBtn.style.background = 'var(--danger-color)';
+        recordBtn.style.color = 'white';
+        recordBtn.innerHTML = '<i class="fa-solid fa-stop"></i>';
+        
+        seconds = 0;
+        recordingStatus.style.color = 'var(--danger-color)';
+        recordTimer = setInterval(() => {
+          seconds++;
+          recordingStatus.innerHTML = `Recording... 00:${seconds < 10 ? '0'+seconds : seconds} / 00:30`;
+          if (seconds >= 30) {
+            stopRecording();
+          }
+        }, 1000);
+      } catch (err) {
+        alert('Microphone access is required to record a voice note.');
+      }
+    } else {
+      stopRecording();
+    }
+  });
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach(track => track.stop());
+    }
+    isRecording = false;
+    clearInterval(recordTimer);
+    recordBtn.style.background = 'white';
+    recordBtn.style.color = 'var(--danger-color)';
+    recordBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+    recordingStatus.style.color = 'var(--success-color)';
+    recordingStatus.innerHTML = 'Recording complete! You can listen below.';
+  }
+</script>
+
+<%- include('../partials/footer') %>

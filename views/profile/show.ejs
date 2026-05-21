@@ -1,0 +1,113 @@
+<%- include('../partials/header') %>
+
+<div class="grid-2 mb-5">
+  <!-- Left Column: User Profile Info -->
+  <div class="card text-center" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem;">
+    <div style="position: relative; margin-bottom: 2rem;">
+      <img src="<%= profileUser.avatar %>" alt="Avatar" style="width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 5px solid var(--primary-color); box-shadow: 0 10px 25px rgba(99,102,241,0.4);">
+      <% if (profileUser.isVerified) { %>
+        <div style="position: absolute; bottom: 10px; right: 10px; background: var(--success-color); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: 4px solid var(--card-bg);">
+          <i class="fa-solid fa-check"></i>
+        </div>
+      <% } %>
+    </div>
+    
+    <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem;"><%= profileUser.name %></h1>
+    <p class="text-muted" style="font-size: 1.2rem; margin-bottom: 1.5rem;"><i class="fa-solid fa-location-dot"></i> <%= profileUser.location || 'Location not specified' %></p>
+    
+    <div class="badge badge-warning" style="font-size: 1.3rem; padding: 0.8rem 1.5rem;">
+      <i class="fa-solid fa-star"></i> <%= profileUser.ratingAvg || 'New Member' %>
+    </div>
+
+    <% if (currentUser && currentUser.id.toString() === profileUser.id.toString()) { %>
+      <div class="mt-5 w-100">
+        <a href="/profile/edit/me" class="btn secondary-btn w-100" style="padding: 1.2rem; font-size: 1.1rem;"><i class="fa-solid fa-pen"></i> Edit Profile</a>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Right Column: Details & Stats -->
+  <div class="d-flex flex-column gap-4">
+    <div class="card">
+      <h3 class="mb-3" style="font-size: 1.5rem;">👤 About Me</h3>
+      <p style="font-size: 1.1rem; line-height: 1.6; color: var(--text-muted);"><%= profileUser.bio || 'No bio provided yet. They are a mystery!' %></p>
+
+      <h3 class="mt-5 mb-3" style="font-size: 1.5rem;">🛠️ Skills</h3>
+      <div class="d-flex flex-wrap gap-2">
+        <% if (profileUser.skills && profileUser.skills.length > 0) { %>
+          <% profileUser.skills.forEach(skill => { %>
+            <span class="tag"><i class="fa-solid fa-bolt text-warning"></i> <%= skill %></span>
+          <% }) %>
+        <% } else { %>
+          <p class="text-muted">No skills listed yet.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card text-center" style="border-top: 5px solid var(--success-color);">
+        <div style="font-size: 2.5rem; color: var(--success-color); margin-bottom: 0.5rem;"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+        <h4 style="font-size: 2.5rem; font-weight: 800; margin: 0;"><%= stats.earned %></h4>
+        <p class="text-muted" style="font-size: 1rem; margin: 0;">Credits Earned</p>
+      </div>
+      <div class="card text-center" style="border-top: 5px solid var(--danger-color);">
+        <div style="font-size: 2.5rem; color: var(--danger-color); margin-bottom: 0.5rem;"><i class="fa-solid fa-basket-shopping"></i></div>
+        <h4 style="font-size: 2.5rem; font-weight: 800; margin: 0;"><%= stats.spent %></h4>
+        <p class="text-muted" style="font-size: 1rem; margin: 0;">Credits Spent</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if (reviewRequestId && currentUser && currentUser.id.toString() !== profileUser.id.toString()) { %>
+  <div class="card mb-5" style="border: 2px dashed var(--primary-color); background: rgba(99, 102, 241, 0.05);">
+    <h3 class="mb-4" style="font-size: 1.5rem;">⭐ Leave a Review for <%= profileUser.name %></h3>
+    <form action="/profile/<%= profileUser.id %>/review" method="POST">
+      <input type="hidden" name="requestId" value="<%= reviewRequestId %>">
+      <div class="form-group">
+        <label>Rating (1-5 Stars)</label>
+        <select name="rating" class="form-control">
+          <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent</option>
+          <option value="4">⭐⭐⭐⭐ 4 - Very Good</option>
+          <option value="3">⭐⭐⭐ 3 - Good</option>
+          <option value="2">⭐⭐ 2 - Fair</option>
+          <option value="1">⭐ 1 - Poor</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Comment</label>
+        <textarea name="comment" class="form-control" placeholder="Describe your experience working with them..." required></textarea>
+      </div>
+      <button type="submit" class="btn primary-btn" style="padding: 1rem 2rem;">Publish Review</button>
+    </form>
+  </div>
+<% } %>
+
+<h3 class="mb-4" style="font-size: 1.8rem;">Community Reviews (<%= reviews.length %>)</h3>
+<% if (reviews.length === 0) { %>
+  <div class="card text-center" style="padding: 3rem;">
+    <p class="text-muted" style="font-size: 1.2rem; margin: 0;">No reviews yet. Be the first to leave one after a task!</p>
+  </div>
+<% } else { %>
+  <div class="grid-2">
+    <% reviews.forEach(review => { %>
+      <div class="list-item" style="flex-direction: column; align-items: flex-start;">
+        <div class="d-flex justify-content-between w-100 mb-3">
+          <div class="d-flex align-items-center gap-3">
+            <img src="<%= review.reviewer.avatar %>" class="list-avatar" alt="" style="width: 45px; height: 45px;">
+            <div>
+              <strong style="font-size: 1.1rem; color: var(--text-dark);"><%= review.reviewer.name %></strong>
+              <div style="font-size: 0.85rem; color: var(--text-light);"><%= new Date(review.createdAt).toLocaleDateString() %></div>
+            </div>
+          </div>
+          <div style="color: var(--warning-color); font-size: 1.2rem;">
+            <% for(let i=0; i<review.rating; i++) { %><i class="fa-solid fa-star"></i><% } %>
+          </div>
+        </div>
+        <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.6; margin: 0;"><%= review.comment %></p>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>
